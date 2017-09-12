@@ -42,10 +42,12 @@ def process(rdd):
 
 def createContext():
     print("Creating new context")
+    SparkContext.setSystemProperty("spark.streaming.receiver.writeAheadLog.enable", "true")
     sc = SparkContext(appName="PythonStreamingKafkaWordCount")
     log4j = sc._jvm.org.apache.log4j
     log4j.LogManager.getRootLogger().setLevel(log4j.Level.ERROR)
-    ssc = StreamingContext(sc, 10)
+    ssc = StreamingContext(sc, 100)
+    sqlC=SQLContext(sc)
     ssc.checkpoint('hdfs:///hdfsproc/pyspark_checkpoint_2')
     brokers = sys.argv[1]
     topic = sys.argv[2]
@@ -55,6 +57,7 @@ def createContext():
 
     jsonstream.pprint()
     jsonstream.foreachRDD(process)
+
 
     return ssc
 
