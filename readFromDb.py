@@ -14,12 +14,13 @@ from pyspark import SparkContext
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
 from pyspark.sql import Row, SQLContext
+from pyspark.sql import HiveContext
 
 
 
 def getSqlContextInstance(sparkContext):
     if ('sqlContextSingletonInstance' not in globals()):
-        globals()['sqlContextSingletonInstance'] = SQLContext(sparkContext)
+        globals()['sqlContextSingletonInstance'] = HiveContext(sparkContext)
     return globals()['sqlContextSingletonInstance']
 
 
@@ -37,6 +38,9 @@ def process(rdd):
         print("Writing to Telephone Log Table")
         jsonDataFrame.write.format("org.apache.spark.sql.cassandra").mode("append").options(table="log_telephone_num",
                                                                                             keyspace="dev_datalake").save();
+        print("Writing to Hive table")
+        jsonDataFrame.write.mode("append").saveAsTable("default.realTimeAudit");
+
     else :
         print("RDD is EMPTY")
 
